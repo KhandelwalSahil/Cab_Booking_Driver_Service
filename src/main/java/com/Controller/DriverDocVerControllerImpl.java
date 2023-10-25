@@ -6,6 +6,7 @@ import com.business.BusinessProcessor;
 import com.business.DocVerificationProcessor;
 import com.util.CacheMap;
 import com.util.GenerateCacheMap;
+import com.util.UserSlidingWindow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,12 +27,20 @@ public class DriverDocVerControllerImpl implements DriverDocVerController {
     private CacheMap<String, Integer> cacheMap;
 
     public String getOTP(Map<String, String> details) {
-        cacheMap = GenerateCacheMap.getCacheMap();
         String dlNo = details.get("DrivingLicense");
-        logger.info("OTP generate request came for license no: " + dlNo);
-        int otp = new Random().nextInt(900000) + 100000;
-        cacheMap.put(dlNo, otp);
-        return "OTP generated: " + otp + " valid for 1 min";
+        if (isAccessValid(dlNo)) {
+            cacheMap = GenerateCacheMap.getCacheMap();
+            logger.info("OTP generate request came for license no: " + dlNo);
+            int otp = new Random().nextInt(900000) + 100000;
+            cacheMap.put(dlNo, otp);
+            return "OTP generated: " + otp + " valid for 1 min";
+        }
+        return "Too many requests";
+    }
+
+    private boolean isAccessValid(String dlNo) {
+        UserSlidingWindow.populateBucketWithRequests(dlNo);
+        return UserSlidingWindow.accessApplication(dlNo);
     }
 
     public String submitDocs(Map<String, String> details) {
