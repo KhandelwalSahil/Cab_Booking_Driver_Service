@@ -30,19 +30,16 @@ class DriverDocVerControllerImplTest {
         MockitoAnnotations.initMocks(this);
     }
 
-//    @Test
+    @Test
     void testGetOTP() {
-        when(cacheMap.put(anyString(), anyInt())).thenReturn(ArgumentMatchers.<Integer>any());
-
         String result = driverDocVerControllerImpl.getOTP(new HashMap<String, String>() {{
             put("DrivingLicense", "String");
         }});
         Assertions.assertTrue(result.contains("OTP generated:"));
     }
 
-//    @Test
+    @Test
     void testSubmitDocs() throws Exception {
-        // TODO: Controller test case
         when(businessProcessor.process(ArgumentMatchers.<String, String>anyMap(), any(InputDetailsValidationStrategy.class))).thenReturn(new HashMap<String, BusinessDTO>() {{
             put("OK", new BusinessDTO() {
             });
