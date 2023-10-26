@@ -67,6 +67,12 @@ public class DBQueryFactory {
                     return "UPDATE driver_status SET status='"+driverStatusDTO.getDriverStatus().toString()+"', latitude='"+driverStatusDTO.getLatitude()+"', longitude='"+driverStatusDTO.getLongitude()+"' where phoneNo='"+driverStatusDTO.getPhoneNo()+"';";
                 }
                 break;
+            case "USER_EXIST":
+                if (businessDTO instanceof DocVerDTO) {
+                    DocVerDTO docVerDTO = (DocVerDTO) businessDTO;
+                    return "select driverID from driver_details where driverID='"+docVerDTO.getDriverID()+"';";
+                }
+                break;
         }
         return null;
     }
