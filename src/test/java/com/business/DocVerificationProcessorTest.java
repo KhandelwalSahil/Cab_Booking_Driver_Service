@@ -33,7 +33,7 @@ class DocVerificationProcessorTest {
     }
 
     @Test
-    void testProcess() throws Exception {
+    void testProcessUserDoesNotExist() throws Exception {
         try (MockedStatic<DBUtil> utilities = Mockito.mockStatic(DBUtil.class)) {
             utilities.when(() -> DBUtil.getConnection()).thenReturn(connection);
             Mockito.doNothing().when(driverDetailsDBService).addEntry(any(), any(), anyBoolean());
@@ -45,7 +45,8 @@ class DocVerificationProcessorTest {
             Map<String, BusinessDTO> result = docVerificationProcessor.process(new HashMap<String, String>() {{
                 put("String", "String");
             }}, docVerValidationStrategy);
-            Assertions.assertNotNull(result.get("OK"));
+            Assertions.assertNull(result.get("OK"));
+            Assertions.assertEquals("User does not exist", result.keySet().toArray()[0].toString());
         }
     }
 
@@ -71,7 +72,7 @@ class DocVerificationProcessorTest {
     void testDBException() {
         boolean flag = false;
         try {
-            Mockito.doThrow(new SQLException()).when(driverDetailsDBService).addEntry(any(), any(), anyBoolean());
+            Mockito.doThrow(new SQLException()).when(driverDetailsDBService).getData(any(), any(), anyInt());
             Mockito.when(docVerValidationStrategy.validate(anyMap())).thenReturn(new HashMap<String, BusinessDTO>() {{
                 put("OK", new BusinessDTO() {
                 });
