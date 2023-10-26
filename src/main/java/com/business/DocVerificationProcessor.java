@@ -37,6 +37,11 @@ public class DocVerificationProcessor implements BusinessProcessor {
                     validationResponse.put("Documents already verified", null);
                     return validationResponse;
                 }
+                if (!doesUserExist(docVerDTO)) {
+                    validationResponse.clear();
+                    validationResponse.put("User does not exist", null);
+                    return validationResponse;
+                }
                 doDBTransactions(docVerDTO);
                 logger.info("Saved doc verify details in DB");
             } else {
@@ -56,8 +61,8 @@ public class DocVerificationProcessor implements BusinessProcessor {
         try {
             connection = DBUtil.getConnection();
             checkPointBefore = connection.setSavepoint();
-            driverDetailsDBService.addEntry("DOC_TABLE_INSERTION", docVerDTO, false);
             driverDetailsDBService.addEntry("DRIVER_TABLE_DOC_VERIFY", docVerDTO, false);
+            driverDetailsDBService.addEntry("DOC_TABLE_INSERTION", docVerDTO, false);
             connection.commit();
         } catch (Exception e) {
             if (checkPointBefore != null) {
@@ -74,7 +79,16 @@ public class DocVerificationProcessor implements BusinessProcessor {
             boolean areDocsVerified = driverDetailsDBService.getData("ARE_DOCS_VERIFIED", docVerDTO, 1);
             return areDocsVerified;
         } catch (Exception e) {
-            throw new Exception("Can't process request, please try again later");
+            throw new Exception("Something went wrong, please try again later");
+        }
+    }
+
+    private boolean doesUserExist(BusinessDTO docVerDTO) throws Exception {
+        try {
+            boolean doesUserExist = driverDetailsDBService.getData("USER_EXIST", docVerDTO, 1);
+            return doesUserExist;
+        } catch (Exception e) {
+            throw new Exception("Something went wrong, please try again later");
         }
     }
 }
